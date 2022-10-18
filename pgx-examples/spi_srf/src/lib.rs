@@ -34,10 +34,12 @@ INSERT INTO dog_daycare(dog_name, dog_age, dog_breed) VALUES ('Moomba', 15, 'Lab
 );
 
 #[pg_extern]
-fn calculate_human_years() -> TableIterator<
-    'static,
-    (name!(dog_name, String), name!(dog_age, i32), name!(dog_breed, String), name!(human_age, i32)),
-> {
+fn calculate_human_years() -> TableIterator<(
+    name!(dog_name, String),
+    name!(dog_age, i32),
+    name!(dog_breed, String),
+    name!(human_age, i32),
+)> {
     /*
         This function is a simple example of using SPI to return a set of rows
         from a query. This query will return the same rows as the table, but
@@ -67,14 +69,11 @@ fn calculate_human_years() -> TableIterator<
 #[pg_extern]
 fn filter_by_breed(
     breed: &str,
-) -> TableIterator<
-    'static,
-    (
-        name!(dog_name, Option<String>),
-        name!(dog_age, Option<i32>),
-        name!(dog_breed, Option<String>),
-    ),
-> {
+) -> TableIterator<(
+    name!(dog_name, Option<String>),
+    name!(dog_age, Option<i32>),
+    name!(dog_breed, Option<String>),
+)> {
     /*
         This function is a simple example of using SPI to return a set of rows
         from a query. This query will return the records for the given breed.

@@ -43,8 +43,8 @@
       - `NULL` Datums are safely represented as `Option::<T>::None`
 - **First-class UDF support**
    + Annotate functions with `#[pg_extern]` to expose them to Postgres
-   + Return `pgx::iter::SetOfIterator<'a, T>` for `RETURNS SETOF`
-   + Return `pgx::iter::TableIterator<'a, T>` for `RETURNS TABLE (...)`
+   + Return `pgx::iter::SetOfIterator<T>` for `RETURNS SETOF`
+   + Return `pgx::iter::TableIterator<T>` for `RETURNS TABLE (...)`
    + Create trigger functions with `#[pg_trigger]`
 - **Easy Custom Types**
    + `#[derive(PostgresType)]` to use a Rust struct as a Postgres type

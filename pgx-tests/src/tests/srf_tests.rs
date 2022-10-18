@@ -10,17 +10,12 @@ Use of this source code is governed by the MIT license that can be found in the 
 use pgx::prelude::*;
 
 #[pg_extern]
-fn example_generate_series(
-    start: i32,
-    end: i32,
-    step: default!(i32, 1),
-) -> SetOfIterator<'static, i32> {
+fn example_generate_series(start: i32, end: i32, step: default!(i32, 1)) -> SetOfIterator<i32> {
     SetOfIterator::new((start..=end).step_by(step as usize).into_iter())
 }
 
 #[pg_extern]
-fn example_composite_set() -> TableIterator<'static, (name!(idx, i32), name!(value, &'static str))>
-{
+fn example_composite_set() -> TableIterator<(name!(idx, i32), name!(value, &'static str))> {
     TableIterator::new(
         vec!["a", "b", "c"].into_iter().enumerate().map(|(idx, value)| ((idx + 1) as i32, value)),
     )
@@ -28,7 +23,7 @@ fn example_composite_set() -> TableIterator<'static, (name!(idx, i32), name!(val
 
 #[pg_extern]
 fn return_some_iterator(
-) -> Option<TableIterator<'static, (name!(idx, i32), name!(some_value, &'static str))>> {
+) -> Option<TableIterator<(name!(idx, i32), name!(some_value, &'static str))>> {
     Some(TableIterator::new(
         vec!["a", "b", "c"].into_iter().enumerate().map(|(idx, value)| ((idx + 1) as i32, value)),
     ))
@@ -36,7 +31,7 @@ fn return_some_iterator(
 
 #[pg_extern]
 fn return_none_iterator(
-) -> Option<TableIterator<'static, (name!(idx, i32), name!(some_value, &'static str))>> {
+) -> Option<TableIterator<(name!(idx, i32), name!(some_value, &'static str))>> {
     if true {
         None
     } else {
@@ -50,12 +45,12 @@ fn return_none_iterator(
 }
 
 #[pg_extern]
-fn return_some_setof_iterator() -> Option<SetOfIterator<'static, i32>> {
+fn return_some_setof_iterator() -> Option<SetOfIterator<i32>> {
     Some(SetOfIterator::new(vec![1, 2, 3].into_iter()))
 }
 
 #[pg_extern]
-fn return_none_setof_iterator() -> Option<SetOfIterator<'static, i32>> {
+fn return_none_setof_iterator() -> Option<SetOfIterator<i32>> {
     if true {
         None
     } else {

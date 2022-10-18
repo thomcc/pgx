@@ -465,8 +465,8 @@ impl PgExtern {
                     #[pg_guard]
                     #[warn(unsafe_op_in_unsafe_fn)]
                     pub unsafe extern "C" fn #func_name_wrapper #func_generics(#fcinfo_ident: ::pgx::pg_sys::FunctionCallInfo) -> ::pgx::pg_sys::Datum {
-                        struct IteratorHolder<'__pgx_internal_lifetime, T: std::panic::UnwindSafe + std::panic::RefUnwindSafe> {
-                            iter: *mut SetOfIterator<'__pgx_internal_lifetime, T>,
+                        struct IteratorHolder<T: std::panic::UnwindSafe + std::panic::RefUnwindSafe> {
+                            iter: *mut SetOfIterator<T>,
                         }
 
                         let mut funcctx: ::pgx::PgBox<pg_sys::FuncCallContext>;
@@ -566,8 +566,8 @@ impl PgExtern {
                     #[pg_guard]
                     #[warn(unsafe_op_in_unsafe_fn)]
                     pub unsafe extern "C" fn #func_name_wrapper #func_generics(#fcinfo_ident: ::pgx::pg_sys::FunctionCallInfo) -> ::pgx::pg_sys::Datum {
-                        struct IteratorHolder<'__pgx_internal_lifetime, T: std::panic::UnwindSafe + std::panic::RefUnwindSafe> {
-                            iter: *mut ::pgx::iter::TableIterator<'__pgx_internal_lifetime, T>,
+                        struct IteratorHolder<T: std::panic::UnwindSafe + std::panic::RefUnwindSafe> {
+                            iter: *mut ::pgx::iter::TableIterator<T>,
                         }
 
                         let mut funcctx: pgx::PgBox<pg_sys::FuncCallContext>;

@@ -62,7 +62,7 @@ fn rstore_size(rstore: Option<RustStore>) -> i64 {
 #[pg_extern]
 fn rstore_table(
     rstore: Option<RustStore>,
-) -> TableIterator<'static, (name!(key, String), name!(value, String))> {
+) -> TableIterator<(name!(key, String), name!(value, String))> {
     match rstore {
         Some(rstore) => TableIterator::new(rstore.0.into_iter()),
         None => TableIterator::once((String::new(), String::new())),

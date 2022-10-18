@@ -37,8 +37,8 @@ fn split(input: &'static str, pattern: &str) -> Vec<&'static str> {
 }
 
 #[pg_extern]
-fn split_set<'a>(input: &'a str, pattern: &'a str) -> SetOfIterator<'a, &'a str> {
-    SetOfIterator::new(input.split_terminator(pattern).into_iter())
+fn split_set(input: &str, pattern: &str) -> SetOfIterator<String> {
+    SetOfIterator::new(input.split_terminator(pattern).map(|s| s.to_string()).collect::<Vec<_>>())
 }
 
 #[cfg(any(test, feature = "pg_test"))]

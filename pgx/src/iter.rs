@@ -5,20 +5,21 @@ use std::iter::once;
 
 use crate::{pg_sys, IntoDatum};
 
-pub struct SetOfIterator<'a, T> {
-    iter: Box<dyn Iterator<Item = T> + 'a>,
+pub struct SetOfIterator<T> {
+    iter: Box<dyn Iterator<Item = T> + 'static>,
 }
 
-impl<'a, T> SetOfIterator<'a, T> {
+impl<T> SetOfIterator<T> {
     pub fn new<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = T> + 'a,
+        I: IntoIterator<Item = T>,
+        I::IntoIter: 'static,
     {
         Self { iter: Box::new(iter.into_iter()) }
     }
 }
 
-impl<'a, T> Iterator for SetOfIterator<'a, T> {
+impl<T> Iterator for SetOfIterator<T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -26,7 +27,7 @@ impl<'a, T> Iterator for SetOfIterator<'a, T> {
     }
 }
 
-unsafe impl<'a, T> SqlTranslatable for SetOfIterator<'a, T>
+unsafe impl<T> SqlTranslatable for SetOfIterator<T>
 where
     T: SqlTranslatable,
 {
@@ -43,27 +44,28 @@ where
     }
 }
 
-pub struct TableIterator<'a, T> {
-    iter: Box<dyn Iterator<Item = T> + 'a>,
+pub struct TableIterator<T> {
+    iter: Box<dyn Iterator<Item = T> + 'static>,
 }
 
-impl<'a, T> TableIterator<'a, T> {
+impl<T> TableIterator<T> {
     pub fn new<I>(iter: I) -> Self
     where
-        I: Iterator<Item = T> + 'a,
+        I: IntoIterator<Item = T> + 'static,
+        I::IntoIter: 'static,
     {
-        Self { iter: Box::new(iter) }
+        Self { iter: Box::new(iter.into_iter()) }
     }
 
-    pub fn once(value: T) -> TableIterator<'a, T>
+    pub fn once(value: T) -> TableIterator<T>
     where
-        T: 'a,
+        T: 'static,
     {
         Self { iter: Box::new(once(value)) }
     }
 }
 
-impl<'a, T> Iterator for TableIterator<'a, T> {
+impl<T: 'static> Iterator for TableIterator<T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -71,7 +73,7 @@ impl<'a, T> Iterator for TableIterator<'a, T> {
     }
 }
 
-impl<'a, T> IntoDatum for TableIterator<'a, T>
+impl<T> IntoDatum for TableIterator<T>
 where
     T: SqlTranslatable,
 {
@@ -87,7 +89,7 @@ where
 seq_macro::seq!(I in 0..=32 {
     #(
         seq_macro::seq!(N in 0..=I {
-            unsafe impl<'a, #(Input~N,)*> SqlTranslatable for TableIterator<'a, (#(Input~N,)*)>
+            unsafe impl<#(Input~N,)*> SqlTranslatable for TableIterator<(#(Input~N,)*)>
             where
                 #(
                     Input~N: SqlTranslatable + 'static,

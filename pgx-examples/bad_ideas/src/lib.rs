@@ -18,7 +18,7 @@ pgx::pg_module_magic!();
 fn exec<'a>(
     command: &'a str,
     args: default!(Vec<Option<&'a str>>, "ARRAY[]::text[]"),
-) -> TableIterator<'static, (name!(status, Option<i32>), name!(stdout, String))> {
+) -> TableIterator<(name!(status, Option<i32>), name!(stdout, String))> {
     let mut command = &mut Command::new(command);
 
     for arg in args {
