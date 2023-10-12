@@ -159,7 +159,7 @@ impl From<Option<pg_sys::Datum>> for Internal {
     }
 }
 
-impl FromDatum for Internal {
+unsafe impl FromDatum for Internal {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -170,7 +170,7 @@ impl FromDatum for Internal {
     }
 }
 
-impl IntoDatum for Internal {
+unsafe impl IntoDatum for Internal {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         self.0

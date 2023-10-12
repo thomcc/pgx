@@ -38,9 +38,21 @@ pub enum TryFromDatumError {
 ///
 /// Default implementations are provided for the common Rust types.
 ///
-/// If implementing this, also implement `IntoDatum` for the reverse
-/// conversion.
-pub trait FromDatum {
+/// If implementing this, also implement `IntoDatum` for the reverse conversion.
+///
+/// # Safety
+/// This trait must be implemented correctly, or Very Bad Things will happen
+/// (anything from data loss and DB corruption to memory unsafety and crashing).
+///
+/// A complete definition on what "correctly" means here is still a work in
+/// progress, but at a minimum:
+/// - [`FromDatum`] must agree with [`IntoDatum`], if both are implemented.
+/// - [`FromDatum`] and [`IntoDatum`] must agree with anything Postgres knows or
+///   believes about the type in question.
+/// - Everything must behave as documented, including implicit documentation
+///   like function and parameter names.
+///
+pub unsafe trait FromDatum {
     /// Should a type OID be fetched when calling `from_datum`?
     const GET_TYPOID: bool = false;
 
@@ -171,7 +183,7 @@ pub(crate) fn lookup_type_name(oid: pg_sys::Oid) -> String {
 }
 
 /// for pg_sys::Datum
-impl FromDatum for pg_sys::Datum {
+unsafe impl FromDatum for pg_sys::Datum {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -186,7 +198,7 @@ impl FromDatum for pg_sys::Datum {
     }
 }
 
-impl FromDatum for pg_sys::Oid {
+unsafe impl FromDatum for pg_sys::Oid {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -206,7 +218,7 @@ impl FromDatum for pg_sys::Oid {
 }
 
 /// for bool
-impl FromDatum for bool {
+unsafe impl FromDatum for bool {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -222,7 +234,7 @@ impl FromDatum for bool {
 }
 
 /// for `"char"`
-impl FromDatum for i8 {
+unsafe impl FromDatum for i8 {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -238,7 +250,7 @@ impl FromDatum for i8 {
 }
 
 /// for smallint
-impl FromDatum for i16 {
+unsafe impl FromDatum for i16 {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -254,7 +266,7 @@ impl FromDatum for i16 {
 }
 
 /// for integer
-impl FromDatum for i32 {
+unsafe impl FromDatum for i32 {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -270,7 +282,7 @@ impl FromDatum for i32 {
 }
 
 /// for oid
-impl FromDatum for u32 {
+unsafe impl FromDatum for u32 {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -286,7 +298,7 @@ impl FromDatum for u32 {
 }
 
 /// for bigint
-impl FromDatum for i64 {
+unsafe impl FromDatum for i64 {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -302,7 +314,7 @@ impl FromDatum for i64 {
 }
 
 /// for real
-impl FromDatum for f32 {
+unsafe impl FromDatum for f32 {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -318,7 +330,7 @@ impl FromDatum for f32 {
 }
 
 /// for double precision
-impl FromDatum for f64 {
+unsafe impl FromDatum for f64 {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -338,7 +350,7 @@ impl FromDatum for f64 {
 /// Note that while these conversions are inherently unsafe, they still enforce
 /// UTF-8 correctness, so they may panic if you use PGRX with a database
 /// that has non-UTF-8 data. The details of this are subject to change.
-impl<'a> FromDatum for &'a str {
+unsafe impl<'a> FromDatum for &'a str {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -410,7 +422,7 @@ unsafe fn convert_varlena_to_str_memoized<'a>(varlena: *const pg_sys::varlena) -
 /// Note that while these conversions are inherently unsafe, they still enforce
 /// UTF-8 correctness, so they may panic if you use PGRX with a database
 /// that has non-UTF-8 data. The details of this are subject to change.
-impl FromDatum for String {
+unsafe impl FromDatum for String {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -421,7 +433,7 @@ impl FromDatum for String {
     }
 }
 
-impl FromDatum for char {
+unsafe impl FromDatum for char {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -434,7 +446,7 @@ impl FromDatum for char {
 }
 
 /// for cstring
-impl<'a> FromDatum for &'a core::ffi::CStr {
+unsafe impl<'a> FromDatum for &'a core::ffi::CStr {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -469,7 +481,7 @@ impl<'a> FromDatum for &'a core::ffi::CStr {
 }
 
 /// for bytea
-impl<'a> FromDatum for &'a [u8] {
+unsafe impl<'a> FromDatum for &'a [u8] {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -510,7 +522,7 @@ impl<'a> FromDatum for &'a [u8] {
     }
 }
 
-impl FromDatum for Vec<u8> {
+unsafe impl FromDatum for Vec<u8> {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -534,7 +546,7 @@ impl FromDatum for Vec<u8> {
 }
 
 /// for VOID -- always converts to `Some(())`, even if the "is_null" argument is true
-impl FromDatum for () {
+unsafe impl FromDatum for () {
     #[inline]
     unsafe fn from_polymorphic_datum(
         _datum: pg_sys::Datum,
@@ -546,7 +558,7 @@ impl FromDatum for () {
 }
 
 /// for user types
-impl<T> FromDatum for PgBox<T, AllocatedByPostgres> {
+unsafe impl<T> FromDatum for PgBox<T, AllocatedByPostgres> {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,

@@ -46,7 +46,7 @@ impl AnyElement {
     }
 }
 
-impl FromDatum for AnyElement {
+unsafe impl FromDatum for AnyElement {
     const GET_TYPOID: bool = true;
 
     /// You should **never** call this function to make this type; it will unconditionally panic.
@@ -71,7 +71,7 @@ impl FromDatum for AnyElement {
     }
 }
 
-impl IntoDatum for AnyElement {
+unsafe impl IntoDatum for AnyElement {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(self.datum)

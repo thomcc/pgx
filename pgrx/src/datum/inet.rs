@@ -89,7 +89,7 @@ impl<'de> Deserialize<'de> for Inet {
     }
 }
 
-impl FromDatum for Inet {
+unsafe impl FromDatum for Inet {
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
         is_null: bool,
@@ -106,7 +106,7 @@ impl FromDatum for Inet {
     }
 }
 
-impl IntoDatum for Inet {
+unsafe impl IntoDatum for Inet {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         let cstr = alloc::ffi::CString::new(self.0).expect("failed to convert inet into CString");
         unsafe { direct_function_call_as_datum(pg_sys::inet_in, &[cstr.as_c_str().into_datum()]) }

@@ -68,3 +68,13 @@ serde = { version = "1.0", features = [ "derive" ] } # impls on pub types
 serde_cbor = "0.11.2" # derive(PostgresType)
 serde_json = "1.0" # everything JSON
 
+# Zeroable, Pod, etc
+[dependencies.bytemuck]
+version = "1.13.1"
+features = [
+    "derive",
+    "zeroable_maybe_uninit",
+    "min_const_generics",
+    "extern_crate_alloc",
+    "extern_crate_std",
+]

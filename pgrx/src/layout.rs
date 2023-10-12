@@ -63,10 +63,10 @@ impl Layout {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) enum Align {
-    Byte,
-    Short,
-    Int,
-    Double,
+    Byte = 1,
+    Short = 2,
+    Int = 4,
+    Double = 8,
 }
 
 impl TryFrom<libc::c_char> for Align {

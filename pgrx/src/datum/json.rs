@@ -30,7 +30,7 @@ pub struct JsonB(pub Value);
 pub struct JsonString(pub String);
 
 /// for json
-impl FromDatum for Json {
+unsafe impl FromDatum for Json {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -51,7 +51,7 @@ impl FromDatum for Json {
 }
 
 /// for jsonb
-impl FromDatum for JsonB {
+unsafe impl FromDatum for JsonB {
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
         is_null: bool,
@@ -91,7 +91,7 @@ impl FromDatum for JsonB {
 /// for `json` types to be represented as a wholly-owned Rust String copy
 ///
 /// This returns a **copy**, allocated and managed by Rust, of the underlying `varlena` Datum
-impl FromDatum for JsonString {
+unsafe impl FromDatum for JsonString {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -120,7 +120,7 @@ impl FromDatum for JsonString {
 }
 
 /// for json
-impl IntoDatum for Json {
+unsafe impl IntoDatum for Json {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         let string = serde_json::to_string(&self.0).expect("failed to serialize Json value");
         string.into_datum()
@@ -132,7 +132,7 @@ impl IntoDatum for Json {
 }
 
 /// for jsonb
-impl IntoDatum for JsonB {
+unsafe impl IntoDatum for JsonB {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         let string = serde_json::to_string(&self.0).expect("failed to serialize JsonB value");
         let cstring =
@@ -147,7 +147,7 @@ impl IntoDatum for JsonB {
 }
 
 /// for jsonstring
-impl IntoDatum for JsonString {
+unsafe impl IntoDatum for JsonString {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         self.0.as_str().into_datum()
     }

@@ -27,7 +27,21 @@ use std::any::Any;
 ///
 /// Note that any conversions that need to allocate memory (ie, for a `varlena *` representation
 /// of a Rust type, that memory **must** be allocated within a [`PgMemoryContexts`](crate::PgMemoryContexts).
-pub trait IntoDatum {
+///
+/// # Safety
+/// This trait must be implemented correctly, or Very Bad Things will happen
+/// (anything from data loss and DB corruption to memory unsafety and crashing).
+///
+/// A complete definition on what "correctly" means here is still a work in
+/// progress, but at a minimum:
+/// - [`IntoDatum`] must agree with [`FromDatum`], if both are implemented.
+/// - [`IntoDatum`] and [`FromDatum`] must agree with anything Postgres knows or
+///   believes about the type in question.
+/// - Everything must behave as documented, including implicit documentation
+///   like function and parameter names.
+///
+/// [`FromDatum`]: crate::FromDatum
+pub unsafe trait IntoDatum {
     fn into_datum(self) -> Option<pg_sys::Datum>;
     fn type_oid() -> pg_sys::Oid;
 
@@ -50,7 +64,7 @@ pub trait IntoDatum {
     /// # use pgrx::*;
     /// # #[repr(transparent)]
     /// # struct FooType(String);
-    /// # impl pgrx::IntoDatum for FooType {
+    /// # unsafe impl pgrx::IntoDatum for FooType {
     ///     fn is_compatible_with(other: pg_sys::Oid) -> bool {
     ///         // first, if our type is the other type, then we're compatible
     ///         Self::type_oid() == other
@@ -75,7 +89,7 @@ pub trait IntoDatum {
 }
 
 /// for supporting NULL as the None value of an Option<T>
-impl<T> IntoDatum for Option<T>
+unsafe impl<T> IntoDatum for Option<T>
 where
     T: IntoDatum,
 {
@@ -91,7 +105,7 @@ where
     }
 }
 
-impl<T, E> IntoDatum for Result<T, E>
+unsafe impl<T, E> IntoDatum for Result<T, E>
 where
     T: IntoDatum,
     E: Any + Display,
@@ -118,7 +132,7 @@ where
 }
 
 /// for bool
-impl IntoDatum for bool {
+unsafe impl IntoDatum for bool {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(if self { 1 } else { 0 }))
@@ -130,7 +144,7 @@ impl IntoDatum for bool {
 }
 
 /// for "char"
-impl IntoDatum for i8 {
+unsafe impl IntoDatum for i8 {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(self))
     }
@@ -141,7 +155,7 @@ impl IntoDatum for i8 {
 }
 
 /// for smallint
-impl IntoDatum for i16 {
+unsafe impl IntoDatum for i16 {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(self))
@@ -157,7 +171,7 @@ impl IntoDatum for i16 {
 }
 
 /// for integer
-impl IntoDatum for i32 {
+unsafe impl IntoDatum for i32 {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(self))
@@ -173,7 +187,7 @@ impl IntoDatum for i32 {
 }
 
 /// for oid
-impl IntoDatum for u32 {
+unsafe impl IntoDatum for u32 {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(self))
@@ -192,7 +206,7 @@ impl IntoDatum for u32 {
 }
 
 /// for bigint
-impl IntoDatum for i64 {
+unsafe impl IntoDatum for i64 {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(self))
@@ -212,7 +226,7 @@ impl IntoDatum for i64 {
 }
 
 /// for real
-impl IntoDatum for f32 {
+unsafe impl IntoDatum for f32 {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(self.to_bits().into())
@@ -224,7 +238,7 @@ impl IntoDatum for f32 {
 }
 
 /// for double precision
-impl IntoDatum for f64 {
+unsafe impl IntoDatum for f64 {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(self.to_bits().into())
@@ -235,7 +249,7 @@ impl IntoDatum for f64 {
     }
 }
 
-impl IntoDatum for pg_sys::Oid {
+unsafe impl IntoDatum for pg_sys::Oid {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         if self == pg_sys::Oid::INVALID {
@@ -251,7 +265,7 @@ impl IntoDatum for pg_sys::Oid {
     }
 }
 
-impl IntoDatum for PgOid {
+unsafe impl IntoDatum for PgOid {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         match self {
@@ -266,7 +280,7 @@ impl IntoDatum for PgOid {
 }
 
 /// for text, varchar
-impl<'a> IntoDatum for &'a str {
+unsafe impl<'a> IntoDatum for &'a str {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         self.as_bytes().into_datum()
@@ -282,7 +296,7 @@ impl<'a> IntoDatum for &'a str {
     }
 }
 
-impl IntoDatum for String {
+unsafe impl IntoDatum for String {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         self.as_str().into_datum()
@@ -298,7 +312,7 @@ impl IntoDatum for String {
     }
 }
 
-impl IntoDatum for &String {
+unsafe impl IntoDatum for &String {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         self.as_str().into_datum()
@@ -314,7 +328,7 @@ impl IntoDatum for &String {
     }
 }
 
-impl IntoDatum for char {
+unsafe impl IntoDatum for char {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         self.to_string().into_datum()
@@ -331,7 +345,7 @@ impl IntoDatum for char {
 }
 
 /// for cstring
-impl<'a> IntoDatum for &'a core::ffi::CStr {
+unsafe impl<'a> IntoDatum for &'a core::ffi::CStr {
     /// The [`core::ffi::CStr`] is copied to `palloc`'d memory.  That memory will either be freed by
     /// Postgres when [`pg_sys::CurrentMemoryContext`] is reset, or when the function you passed the
     /// returned Datum to decides to free it.
@@ -358,7 +372,7 @@ impl<'a> IntoDatum for &'a core::ffi::CStr {
     }
 }
 
-impl IntoDatum for alloc::ffi::CString {
+unsafe impl IntoDatum for alloc::ffi::CString {
     /// The [`core::ffi::CString`] is copied to `palloc`'d memory.  That memory will either be freed by
     /// Postgres when [`pg_sys::CurrentMemoryContext`] is reset, or when the function you passed the
     /// returned Datum to decides to free it.
@@ -373,7 +387,7 @@ impl IntoDatum for alloc::ffi::CString {
 }
 
 /// for bytea
-impl<'a> IntoDatum for &'a [u8] {
+unsafe impl<'a> IntoDatum for &'a [u8] {
     /// # Panics
     ///
     /// This function will panic if the string being converted to a datum is longer than a `u32`.
@@ -419,7 +433,7 @@ impl<'a> IntoDatum for &'a [u8] {
     }
 }
 
-impl IntoDatum for Vec<u8> {
+unsafe impl IntoDatum for Vec<u8> {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         (&self[..]).into_datum()
@@ -432,7 +446,7 @@ impl IntoDatum for Vec<u8> {
 }
 
 /// for VOID
-impl IntoDatum for () {
+unsafe impl IntoDatum for () {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         // VOID isn't very useful, but Postgres represents it as a non-null Datum with a zero value
@@ -445,7 +459,7 @@ impl IntoDatum for () {
 }
 
 /// for user types
-impl<T, AllocatedBy: WhoAllocated> IntoDatum for PgBox<T, AllocatedBy> {
+unsafe impl<T, AllocatedBy: WhoAllocated> IntoDatum for PgBox<T, AllocatedBy> {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         if self.is_null() {
@@ -460,7 +474,7 @@ impl<T, AllocatedBy: WhoAllocated> IntoDatum for PgBox<T, AllocatedBy> {
     }
 }
 
-impl IntoDatum for pg_sys::Datum {
+unsafe impl IntoDatum for pg_sys::Datum {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(self)
     }

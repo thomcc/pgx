@@ -22,7 +22,7 @@ pub type UuidBytes = [u8; UUID_BYTES_LEN];
 #[repr(transparent)]
 pub struct Uuid(UuidBytes);
 
-impl IntoDatum for Uuid {
+unsafe impl IntoDatum for Uuid {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         let ptr = unsafe {
@@ -40,7 +40,7 @@ impl IntoDatum for Uuid {
     }
 }
 
-impl FromDatum for Uuid {
+unsafe impl FromDatum for Uuid {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,

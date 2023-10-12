@@ -648,7 +648,7 @@ fn impl_postgres_enum(ast: DeriveInput) -> syn::Result<proc_macro2::TokenStream>
     }
 
     stream.extend(quote! {
-        impl ::pgrx::datum::FromDatum for #enum_ident {
+        unsafe impl ::pgrx::datum::FromDatum for #enum_ident {
             #[inline]
             unsafe fn from_polymorphic_datum(datum: ::pgrx::pg_sys::Datum, is_null: bool, typeoid: ::pgrx::pg_sys::Oid) -> Option<#enum_ident> {
                 if is_null {
@@ -664,7 +664,7 @@ fn impl_postgres_enum(ast: DeriveInput) -> syn::Result<proc_macro2::TokenStream>
             }
         }
 
-        impl ::pgrx::datum::IntoDatum for #enum_ident {
+        unsafe impl ::pgrx::datum::IntoDatum for #enum_ident {
             #[inline]
             fn into_datum(self) -> Option<::pgrx::pg_sys::Datum> {
                 match self {

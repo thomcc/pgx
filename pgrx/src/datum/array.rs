@@ -23,7 +23,7 @@ use pgrx_sql_entity_graph::metadata::{
 use serde::Serializer;
 
 /** An array of some type (eg. `TEXT[]`, `int[]`)
-
+af
 While conceptually similar to a [`Vec<T>`][std::vec::Vec], arrays are lazy.
 
 Using a [`Vec<T>`][std::vec::Vec] here means each element of the passed array will be eagerly fetched and converted into a Rust type:
@@ -681,7 +681,7 @@ impl<'a, T: FromDatum> Iterator for ArrayIntoIterator<'a, T> {
 impl<'a, T: FromDatum> ExactSizeIterator for ArrayIntoIterator<'a, T> {}
 impl<'a, T: FromDatum> core::iter::FusedIterator for ArrayIntoIterator<'a, T> {}
 
-impl<'a, T: FromDatum> FromDatum for VariadicArray<'a, T> {
+unsafe impl<'a, T: FromDatum> FromDatum for VariadicArray<'a, T> {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -692,7 +692,7 @@ impl<'a, T: FromDatum> FromDatum for VariadicArray<'a, T> {
     }
 }
 
-impl<'a, T: FromDatum> FromDatum for Array<'a, T> {
+unsafe impl<'a, T: FromDatum> FromDatum for Array<'a, T> {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -729,7 +729,7 @@ impl<'a, T: FromDatum> FromDatum for Array<'a, T> {
     }
 }
 
-impl<T: IntoDatum + FromDatum> IntoDatum for Array<'_, T> {
+unsafe impl<T: IntoDatum + FromDatum> IntoDatum for Array<'_, T> {
     #[inline]
     fn into_datum(self) -> Option<Datum> {
         let array_type = self.into_array_type();
@@ -743,7 +743,7 @@ impl<T: IntoDatum + FromDatum> IntoDatum for Array<'_, T> {
     }
 }
 
-impl<T: FromDatum> FromDatum for Vec<T> {
+unsafe impl<T: FromDatum> FromDatum for Vec<T> {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -772,7 +772,7 @@ impl<T: FromDatum> FromDatum for Vec<T> {
     }
 }
 
-impl<T: FromDatum> FromDatum for Vec<Option<T>> {
+unsafe impl<T: FromDatum> FromDatum for Vec<Option<T>> {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -797,7 +797,7 @@ impl<T: FromDatum> FromDatum for Vec<Option<T>> {
     }
 }
 
-impl<T> IntoDatum for Vec<T>
+unsafe impl<T> IntoDatum for Vec<T>
 where
     T: IntoDatum,
 {
@@ -844,7 +844,7 @@ where
     }
 }
 
-impl<'a, T> IntoDatum for &'a [T]
+unsafe impl<'a, T> IntoDatum for &'a [T]
 where
     T: IntoDatum + Copy + 'a,
 {

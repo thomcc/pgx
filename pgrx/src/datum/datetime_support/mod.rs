@@ -166,7 +166,7 @@ impl Display for DateTimeParts {
     }
 }
 
-impl IntoDatum for DateTimeParts {
+unsafe impl IntoDatum for DateTimeParts {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         let name: &'static str = self.into();

@@ -11,7 +11,7 @@ use crate::{
     item_pointer_get_both, item_pointer_set_all, pg_sys, FromDatum, IntoDatum, PgMemoryContexts,
 };
 
-impl FromDatum for pg_sys::ItemPointerData {
+unsafe impl FromDatum for pg_sys::ItemPointerData {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -31,7 +31,7 @@ impl FromDatum for pg_sys::ItemPointerData {
     }
 }
 
-impl IntoDatum for pg_sys::ItemPointerData {
+unsafe impl IntoDatum for pg_sys::ItemPointerData {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         let tid = self;

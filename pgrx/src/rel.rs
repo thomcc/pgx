@@ -299,7 +299,7 @@ impl Clone for PgRelation {
     }
 }
 
-impl FromDatum for PgRelation {
+unsafe impl FromDatum for PgRelation {
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
         is_null: bool,
@@ -316,7 +316,7 @@ impl FromDatum for PgRelation {
     }
 }
 
-impl IntoDatum for PgRelation {
+unsafe impl IntoDatum for PgRelation {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(self.oid()))
     }

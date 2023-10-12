@@ -70,7 +70,7 @@ unsafe impl SqlTranslatable for HexInt {
     }
 }
 
-impl FromDatum for HexInt {
+unsafe impl FromDatum for HexInt {
     unsafe fn from_polymorphic_datum(datum: Datum, is_null: bool, _: Oid) -> Option<Self>
     where
         Self: Sized,
@@ -83,7 +83,7 @@ impl FromDatum for HexInt {
     }
 }
 
-impl IntoDatum for HexInt {
+unsafe impl IntoDatum for HexInt {
     fn into_datum(self) -> Option<Datum> {
         Some(Datum::from(self.value))
     }

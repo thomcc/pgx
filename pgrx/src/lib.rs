@@ -57,6 +57,7 @@ pub mod iter;
 #[cfg(feature = "cshim")]
 pub mod list;
 pub mod lwlock;
+pub mod mem;
 pub mod memcxt;
 pub mod misc;
 #[cfg(feature = "cshim")]
@@ -83,6 +84,8 @@ pub use once_cell;
 mod layout;
 mod slice;
 mod toast;
+// Never intended for public exposure.
+pub(crate) mod util;
 
 pub use aggregate::*;
 pub use atomics::*;

@@ -9,7 +9,7 @@
 //LICENSE Use of this source code is governed by the MIT license that can be found in the LICENSE file.
 use crate::{pg_sys, FromDatum, IntoDatum};
 
-impl<A, B> IntoDatum for (Option<A>, Option<B>)
+unsafe impl<A, B> IntoDatum for (Option<A>, Option<B>)
 where
     A: IntoDatum,
     B: IntoDatum,
@@ -24,7 +24,7 @@ where
     }
 }
 
-impl<A, B, C> IntoDatum for (Option<A>, Option<B>, Option<C>)
+unsafe impl<A, B, C> IntoDatum for (Option<A>, Option<B>, Option<C>)
 where
     A: IntoDatum,
     B: IntoDatum,
@@ -40,7 +40,7 @@ where
     }
 }
 
-impl<A, B> FromDatum for (Option<A>, Option<B>)
+unsafe impl<A, B> FromDatum for (Option<A>, Option<B>)
 where
     A: FromDatum + IntoDatum,
     B: FromDatum + IntoDatum,
@@ -74,7 +74,7 @@ where
     }
 }
 
-impl<A, B, C> FromDatum for (Option<A>, Option<B>, Option<C>)
+unsafe impl<A, B, C> FromDatum for (Option<A>, Option<B>, Option<C>)
 where
     A: FromDatum + IntoDatum,
     B: FromDatum + IntoDatum,

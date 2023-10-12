@@ -303,7 +303,7 @@ where
     }
 }
 
-impl<T> FromDatum for Range<T>
+unsafe impl<T> FromDatum for Range<T>
 where
     T: RangeSubType,
 {
@@ -364,7 +364,7 @@ where
     }
 }
 
-impl<T> IntoDatum for Range<T>
+unsafe impl<T> IntoDatum for Range<T>
 where
     T: RangeSubType,
 {

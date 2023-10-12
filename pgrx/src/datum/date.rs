@@ -85,7 +85,7 @@ impl TryFrom<pg_sys::Datum> for Date {
     }
 }
 
-impl FromDatum for Date {
+unsafe impl FromDatum for Date {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -103,7 +103,7 @@ impl FromDatum for Date {
     }
 }
 
-impl IntoDatum for Date {
+unsafe impl IntoDatum for Date {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(self.0))
     }

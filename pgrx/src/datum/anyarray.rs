@@ -40,7 +40,7 @@ impl AnyArray {
     }
 }
 
-impl FromDatum for AnyArray {
+unsafe impl FromDatum for AnyArray {
     const GET_TYPOID: bool = true;
 
     /// You should **never** call this function to make this type; it will unconditionally panic.
@@ -65,7 +65,7 @@ impl FromDatum for AnyArray {
     }
 }
 
-impl IntoDatum for AnyArray {
+unsafe impl IntoDatum for AnyArray {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(self.datum)

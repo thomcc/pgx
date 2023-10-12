@@ -58,7 +58,7 @@ pub struct PgHeapTuple<'a, AllocatedBy: WhoAllocated> {
     tupdesc: PgTupleDesc<'a>,
 }
 
-impl<'a> FromDatum for PgHeapTuple<'a, AllocatedByRust> {
+unsafe impl<'a> FromDatum for PgHeapTuple<'a, AllocatedByRust> {
     unsafe fn from_polymorphic_datum(
         composite: pg_sys::Datum,
         is_null: bool,
@@ -395,7 +395,7 @@ impl<'a> PgHeapTuple<'a, AllocatedByRust> {
     }
 }
 
-impl<'a, AllocatedBy: WhoAllocated> IntoDatum for PgHeapTuple<'a, AllocatedBy> {
+unsafe impl<'a, AllocatedBy: WhoAllocated> IntoDatum for PgHeapTuple<'a, AllocatedBy> {
     // Delegate to `into_composite_datum()` as this will normally be used with composite types.
     // See `into_trigger_datum()` if using as a trigger.
     fn into_datum(self) -> Option<pg_sys::Datum> {

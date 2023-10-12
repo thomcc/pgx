@@ -134,6 +134,7 @@ impl<T> PgBox<T, AllocatedByPostgres> {
     /// allocated it, Postgres is responsible for freeing it.
     #[inline]
     pub unsafe fn from_pg(ptr: *mut T) -> PgBox<T, AllocatedByPostgres> {
+        debug_check_dynamic_align(ptr);
         PgBox::<T, AllocatedByPostgres> { ptr: NonNull::new(ptr), __marker: PhantomData }
     }
 }
@@ -172,6 +173,7 @@ impl<T, AllocatedBy: WhoAllocated> PgBox<T, AllocatedBy> {
     /// be a valid state for `T`.
     #[inline]
     pub unsafe fn alloc() -> PgBox<T, AllocatedByRust> {
+        check_static_align::<T>();
         PgBox::<T, AllocatedByRust> {
             ptr: Some(unsafe {
                 NonNull::new_unchecked(pg_sys::palloc(std::mem::size_of::<T>()) as *mut T)
@@ -202,6 +204,7 @@ impl<T, AllocatedBy: WhoAllocated> PgBox<T, AllocatedBy> {
     /// be a valid state for `T`.
     #[inline]
     pub unsafe fn alloc0() -> PgBox<T, AllocatedByRust> {
+        check_static_align::<T>();
         PgBox::<T, AllocatedByRust> {
             ptr: Some(unsafe {
                 NonNull::new_unchecked(pg_sys::palloc0(std::mem::size_of::<T>()) as *mut T)
@@ -232,6 +235,7 @@ impl<T, AllocatedBy: WhoAllocated> PgBox<T, AllocatedBy> {
     /// be a valid state for `T`.
     #[inline]
     pub unsafe fn alloc_in_context(memory_context: PgMemoryContexts) -> PgBox<T, AllocatedByRust> {
+        check_static_align::<T>();
         PgBox::<T, AllocatedByRust> {
             ptr: Some(unsafe {
                 NonNull::new_unchecked(pg_sys::MemoryContextAlloc(
@@ -265,6 +269,7 @@ impl<T, AllocatedBy: WhoAllocated> PgBox<T, AllocatedBy> {
     /// be a valid state for `T`.
     #[inline]
     pub unsafe fn alloc0_in_context(memory_context: PgMemoryContexts) -> PgBox<T, AllocatedByRust> {
+        check_static_align::<T>();
         PgBox::<T, AllocatedByRust> {
             ptr: Some(unsafe {
                 NonNull::new_unchecked(pg_sys::MemoryContextAllocZero(
@@ -474,4 +479,29 @@ unsafe impl<T: SqlTranslatable> SqlTranslatable for PgBox<T, AllocatedByRust> {
     fn return_sql() -> Result<Returns, ReturnsError> {
         T::return_sql()
     }
+}
+
+#[inline]
+#[track_caller]
+fn check_static_align<T>() {
+    assert!(
+        core::mem::align_of::<T>() <= (pg_sys::MAXIMUM_ALIGNOF as usize),
+        "`{}` is too highly-aligned to be allocated in a postgres memory context (align was {}, max is {}). \
+         If possible, consider using `Box` and not `PgBox`.",
+         core::any::type_name::<T>(),
+         core::mem::align_of::<T>(),
+         pg_sys::MAXIMUM_ALIGNOF,
+    );
+}
+
+#[inline]
+#[track_caller]
+fn debug_check_dynamic_align<T>(ptr: *mut T) {
+    debug_assert!(
+        (ptr as usize % core::mem::align_of::<T>()) == 0,
+        "pointer is misaligned for `{}`: pointer {:p} should have alignment {}",
+        core::any::type_name::<T>(),
+        ptr,
+        core::mem::align_of::<T>(),
+    );
 }

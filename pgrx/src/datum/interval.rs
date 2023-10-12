@@ -220,7 +220,7 @@ impl Interval {
     }
 }
 
-impl FromDatum for Interval {
+unsafe impl FromDatum for Interval {
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
         is_null: bool,
@@ -239,7 +239,7 @@ impl FromDatum for Interval {
     }
 }
 
-impl IntoDatum for Interval {
+unsafe impl IntoDatum for Interval {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         unsafe {
             let ptr =

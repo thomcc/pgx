@@ -9,7 +9,7 @@
 //LICENSE Use of this source code is governed by the MIT license that can be found in the LICENSE file.
 use crate::{pg_sys, varsize_any, AnyNumeric, FromDatum, IntoDatum, Numeric};
 
-impl FromDatum for AnyNumeric {
+unsafe impl FromDatum for AnyNumeric {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -54,7 +54,7 @@ impl FromDatum for AnyNumeric {
     }
 }
 
-impl IntoDatum for AnyNumeric {
+unsafe impl IntoDatum for AnyNumeric {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         unsafe {
@@ -72,7 +72,7 @@ impl IntoDatum for AnyNumeric {
     }
 }
 
-impl<const P: u32, const S: u32> FromDatum for Numeric<P, S> {
+unsafe impl<const P: u32, const S: u32> FromDatum for Numeric<P, S> {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -90,7 +90,7 @@ impl<const P: u32, const S: u32> FromDatum for Numeric<P, S> {
     }
 }
 
-impl<const P: u32, const S: u32> IntoDatum for Numeric<P, S> {
+unsafe impl<const P: u32, const S: u32> IntoDatum for Numeric<P, S> {
     #[inline]
     fn into_datum(self) -> Option<pg_sys::Datum> {
         self.0.into_datum()

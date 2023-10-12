@@ -30,7 +30,13 @@ struct DatumBlob {
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
 }
 
-/// Datum is an abstract value that is effectively a union of all scalar types
+/// The "raw" Datum type. Note that because `Datum` does not carry a lifetime (let
+/// alone type information), it is... rather unsafe. You should consider
+/// `DatumRef<'a>` (which carries a lifetime). It would be nice if we
+/// could rename this to `RawDatum`, but at this point the extreme churn is
+/// unlikely to be worth it.
+///
+/// `Datum` is an abstract value that is effectively a union of all scalar types
 /// and all possible pointers in a Postgres context. That is, it is either
 /// "pass-by-value" (if the value fits into the platform's `uintptr_t`) or
 /// "pass-by-reference" (if it does not).

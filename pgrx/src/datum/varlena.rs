@@ -327,7 +327,7 @@ where
     }
 }
 
-impl<T> IntoDatum for PgVarlena<T>
+unsafe impl<T> IntoDatum for PgVarlena<T>
 where
     T: Copy + Sized,
 {
@@ -340,7 +340,7 @@ where
     }
 }
 
-impl<T> FromDatum for PgVarlena<T>
+unsafe impl<T> FromDatum for PgVarlena<T>
 where
     T: Copy + Sized,
 {
@@ -379,7 +379,7 @@ where
     }
 }
 
-impl<T> IntoDatum for T
+unsafe impl<T> IntoDatum for T
 where
     T: PostgresType + Serialize,
 {
@@ -392,7 +392,7 @@ where
     }
 }
 
-impl<'de, T> FromDatum for T
+unsafe impl<'de, T> FromDatum for T
 where
     T: PostgresType + Deserialize<'de>,
 {

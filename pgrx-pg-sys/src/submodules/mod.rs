@@ -21,6 +21,8 @@ pub mod polyfill;
 pub(crate) mod thread_check;
 pub mod tupdesc;
 
+pub mod mem;
+
 pub mod utils;
 
 // Various SqlTranslatable mappings for SQL generation

@@ -91,7 +91,7 @@ impl From<Timestamp> for TimestampWithTimeZone {
     }
 }
 
-impl IntoDatum for TimestampWithTimeZone {
+unsafe impl IntoDatum for TimestampWithTimeZone {
     fn into_datum(self) -> Option<pg_sys::Datum> {
         Some(pg_sys::Datum::from(self.0))
     }
@@ -100,7 +100,7 @@ impl IntoDatum for TimestampWithTimeZone {
     }
 }
 
-impl FromDatum for TimestampWithTimeZone {
+unsafe impl FromDatum for TimestampWithTimeZone {
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
         is_null: bool,

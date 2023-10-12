@@ -63,7 +63,7 @@ impl From<TimestampWithTimeZone> for TimeWithTimeZone {
     }
 }
 
-impl FromDatum for TimeWithTimeZone {
+unsafe impl FromDatum for TimeWithTimeZone {
     #[inline]
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
@@ -78,7 +78,7 @@ impl FromDatum for TimeWithTimeZone {
     }
 }
 
-impl IntoDatum for TimeWithTimeZone {
+unsafe impl IntoDatum for TimeWithTimeZone {
     #[inline]
     fn into_datum(mut self) -> Option<pg_sys::Datum> {
         let timetzadt = unsafe {

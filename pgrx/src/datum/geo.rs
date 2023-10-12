@@ -9,7 +9,7 @@
 //LICENSE Use of this source code is governed by the MIT license that can be found in the LICENSE file.
 use crate::{pg_sys, FromDatum, IntoDatum, PgMemoryContexts};
 
-impl FromDatum for pg_sys::BOX {
+unsafe impl FromDatum for pg_sys::BOX {
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
         is_null: bool,
@@ -27,7 +27,7 @@ impl FromDatum for pg_sys::BOX {
     }
 }
 
-impl IntoDatum for pg_sys::BOX {
+unsafe impl IntoDatum for pg_sys::BOX {
     fn into_datum(mut self) -> Option<pg_sys::Datum> {
         unsafe {
             let ptr = PgMemoryContexts::CurrentMemoryContext
@@ -41,7 +41,7 @@ impl IntoDatum for pg_sys::BOX {
     }
 }
 
-impl FromDatum for pg_sys::Point {
+unsafe impl FromDatum for pg_sys::Point {
     unsafe fn from_polymorphic_datum(
         datum: pg_sys::Datum,
         is_null: bool,
@@ -59,7 +59,7 @@ impl FromDatum for pg_sys::Point {
     }
 }
 
-impl IntoDatum for pg_sys::Point {
+unsafe impl IntoDatum for pg_sys::Point {
     fn into_datum(mut self) -> Option<pg_sys::Datum> {
         unsafe {
             let copy = PgMemoryContexts::CurrentMemoryContext
